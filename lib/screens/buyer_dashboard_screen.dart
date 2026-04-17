@@ -13,6 +13,8 @@ import '../widgets/hakikisha_modal.dart';
 import '../utils/phone_formatter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/transaction_hub.dart';
+import '../services/sse_service.dart';
+import 'dart:async';
 
 import '../widgets/finance_hub_overlay.dart';
 import 'faq_screen.dart';
@@ -30,6 +32,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   List<Deal> _deals = [];
   bool _loading = false;
   bool _balanceHidden = false;
+  StreamSubscription<SseEvent>? _sseSub;
 
   static const _green = Color(0xFF2E9D5B);
 
@@ -37,6 +40,13 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadDeals());
+    _sseSub = SseService.stream.listen((_) => _loadDeals());
+  }
+
+  @override
+  void dispose() {
+    _sseSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadDeals() async {

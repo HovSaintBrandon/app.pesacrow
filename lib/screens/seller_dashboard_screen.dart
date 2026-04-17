@@ -16,6 +16,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/transaction_hub.dart';
 
 import '../widgets/finance_hub_overlay.dart';
+import '../services/sse_service.dart';
+import 'dart:async';
 
 
 class SellerDashboardScreen extends StatefulWidget {
@@ -30,6 +32,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   List<Deal> _deals = [];
   Map<String, dynamic>? _payoutPref;
   bool _loading = false;
+  StreamSubscription<SseEvent>? _sseSub;
 
   static const _blue = Color(0xFF3182CE);
 
@@ -37,6 +40,13 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   void initState() {
     super.initState();
     _loadDeals();
+    _sseSub = SseService.stream.listen((_) => _loadDeals());
+  }
+
+  @override
+  void dispose() {
+    _sseSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadDeals() async {

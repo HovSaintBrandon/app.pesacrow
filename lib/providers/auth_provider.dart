@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../services/sse_service.dart';
 class AuthProvider extends ChangeNotifier {
   String? _token;
   String? _phone;
@@ -23,6 +24,8 @@ class AuthProvider extends ChangeNotifier {
     _phone = prefs.getString('mpescrow_phone');
     _role = prefs.getString('mpescrow_role');
     _activeRole = prefs.getString('mpescrow_active_role');
+    // Re-open SSE connection if a session is already stored (app restart).
+    if (_token != null) SseService.connect();
     notifyListeners();
   }
 
@@ -41,10 +44,15 @@ class AuthProvider extends ChangeNotifier {
     _token = token;
     _phone = phone;
     _role = role;
+    // Open the SSE channel as soon as the session is established.
+    SseService.connect();
     notifyListeners();
   }
 
   Future<void> logout() async {
+    // Close the SSE channel before clearing the token so the disconnect
+    // call can still read the token if needed during teardown.
+    SseService.disconnect();
     await ApiService.logout(); // Invalidate server-side session
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('mpescrow_token');

@@ -11,6 +11,7 @@ import '../models/deal.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../services/logger_service.dart';
+import '../services/sse_service.dart';
 import '../core/notifications.dart';
 import '../widgets/status_badge.dart';
 import '../widgets/step_wizard.dart';
@@ -42,17 +43,39 @@ class _DealDashboardScreenState extends State<DealDashboardScreen> {
   bool _fetchingFees = false;
   late ConfettiController _confettiCtrl;
 
+  /// SSE subscription — auto-refreshes the deal whenever the server pushes
+  /// a status-change event for this transaction.
+  StreamSubscription<SseEvent>? _sseSubscription;
+
   @override
   void initState() {
     super.initState();
     _confettiCtrl = ConfettiController(duration: const Duration(seconds: 3));
     _fetchDeal();
+    _subscribeToSse();
   }
 
   @override
   void dispose() {
+    _sseSubscription?.cancel();
     _confettiCtrl.dispose();
     super.dispose();
+  }
+
+  /// Listens to the global SSE stream and re-fetches deal data whenever an
+  /// event targeting THIS transaction arrives.
+  void _subscribeToSse() {
+    _sseSubscription = SseService.stream
+        .where((e) => e.transactionId == widget.transactionId)
+        .listen((event) {
+      LoggerService.logEvent('DEAL_SSE_UPDATE', {
+        'transactionId': widget.transactionId,
+        'type': event.type,
+        'status': event.status,
+      });
+      // Re-fetch from server to get the full, authoritative deal state.
+      _fetchDeal();
+    });
   }
 
   Future<void> _fetchDeal() async {

@@ -19,6 +19,8 @@ import 'payout_preferences_screen.dart';
 import 'profile_screen.dart';
 import 'role_selection_screen.dart';
 import '../widgets/mode_shift_overlay.dart';
+import '../services/sse_service.dart';
+import 'dart:async';
 
 // ── Breakpoints ────────────────────────────────────────────────────────────────
 const double _kWebBreakpoint = 800.0;
@@ -578,11 +580,19 @@ class _AllDealsTab extends StatefulWidget {
 class _AllDealsTabState extends State<_AllDealsTab> {
   List<Deal> _deals = [];
   bool _loading = false;
+  StreamSubscription<SseEvent>? _sseSub;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _sseSub = SseService.stream.listen((_) => _load());
+  }
+
+  @override
+  void dispose() {
+    _sseSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {

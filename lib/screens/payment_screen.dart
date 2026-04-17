@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import '../services/api_service.dart';
 import '../services/logger_service.dart';
+import '../services/sse_service.dart';
 import '../core/notifications.dart';
 import '../providers/auth_provider.dart';
 import '../utils/phone_utils.dart';
@@ -29,8 +30,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool _stkLoading = false;
   String? _statusMessage;
   bool _paymentInitiated = false;
+  // --- SSE + polling ---------------------------------------------------------
+  StreamSubscription<SseEvent>? _sseSubscription;
   Timer? _pollTimer;
   int _pollCount = 0;
+  // ---------------------------------------------------------------------------
   FeeBreakdown? _feeBreakdown;
   bool _fetchingFees = true;
 
@@ -69,6 +73,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   void dispose() {
+    _sseSubscription?.cancel();
     _pollTimer?.cancel();
     _phoneCtrl.dispose();
     super.dispose();
@@ -114,7 +119,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       await ApiService.initiateStk(transactionId: widget.transactionId, buyerPhone: phone);
       if (mounted) setState(() => _statusMessage = 'STK sent! Check your phone for the PIN prompt.');
-      _startPolling();
+      _startListening();
     } catch (e) {
       LoggerService.logError('Payment initiate failed', e);
       if (mounted) setState(() { _stkLoading = false; _statusMessage = null; _paymentInitiated = false; });
@@ -122,28 +127,73 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  void _startPolling() {
+  // ---------------------------------------------------------------------------
+  // Payment confirmation listeners
+  // ---------------------------------------------------------------------------
+
+  /// Primary listener: SSE stream — instant confirmation with no polling cost.
+  /// Fallback listener: REST polling every 3 s — always runs in parallel so
+  /// that a temporary SSE hiccup never blocks payment confirmation.
+  void _startListening() {
+    _cancelListeners();
+
+    // --- SSE (primary) -------------------------------------------------------
+    if (SseService.isConnected) {
+      _sseSubscription = SseService.stream
+          .where((e) =>
+              e.transactionId == widget.transactionId && e.status == 'held')
+          .listen((_) {
+        LoggerService.logEvent('PAYMENT_CONFIRMED_VIA_SSE',
+            {'transactionId': widget.transactionId});
+        _onPaymentConfirmed();
+      });
+    }
+
+    // --- Polling (fallback / safety net) ------------------------------------
     _pollCount = 0;
-    _pollTimer?.cancel();
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
       _pollCount++;
       if (_pollCount > 40) {
         timer.cancel();
-        if (mounted) setState(() { _stkLoading = false; _statusMessage = 'Timeout — please check M-Pesa and try again.'; });
+        _onPaymentTimeout();
         return;
       }
       try {
-        final status = await ApiService.getDealStatus(widget.transactionId);
+        final status =
+            await ApiService.getDealStatus(widget.transactionId);
         if (status == 'held') {
-          timer.cancel();
-          LoggerService.logEvent('PAYMENT_CONFIRMED', {'transactionId': widget.transactionId});
-          if (!mounted) return;
-          setState(() { _stkLoading = false; _statusMessage = '🎉 Payment secured in escrow!'; });
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) Navigator.pop(context, true);
-          });
+          LoggerService.logEvent('PAYMENT_CONFIRMED_VIA_POLL',
+              {'transactionId': widget.transactionId});
+          _onPaymentConfirmed();
         }
       } catch (_) {}
+    });
+  }
+
+  void _cancelListeners() {
+    _sseSubscription?.cancel();
+    _sseSubscription = null;
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
+  void _onPaymentConfirmed() {
+    _cancelListeners();
+    if (!mounted) return;
+    setState(() {
+      _stkLoading = false;
+      _statusMessage = '🎉 Payment secured in escrow!';
+    });
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) Navigator.pop(context, true);
+    });
+  }
+
+  void _onPaymentTimeout() {
+    if (!mounted) return;
+    setState(() {
+      _stkLoading = false;
+      _statusMessage = 'Timeout — please check M-Pesa and try again.';
     });
   }
 
@@ -335,7 +385,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 const CircularProgressIndicator(strokeWidth: 2, color: _green),
               const SizedBox(height: 60),
               OutlinedButton(
-                onPressed: () { _pollTimer?.cancel(); setState(() { _stkLoading = false; _paymentInitiated = false; _statusMessage = null; }); },
+                onPressed: () {
+                  _cancelListeners();
+                  setState(() {
+                    _stkLoading = false;
+                    _paymentInitiated = false;
+                    _statusMessage = null;
+                  });
+                },
                 style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20), side: BorderSide(color: Colors.white10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                 child: Text('Cancel Request', style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w700)),
               ),
