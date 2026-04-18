@@ -61,7 +61,7 @@ class SeoService {
     }
   }
 
-  static String _jsString(String s) => '"\${_escape(s)}"';
+  static String _jsString(String s) => '"${_escape(s)}"';
 
   static String _escape(String s) => s.replaceAll('"', '\\"').replaceAll('\\n', ' ');
 }
