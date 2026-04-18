@@ -89,7 +89,6 @@ class SseService {
       );
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Accept'] = 'text/event-stream';
-      request.headers['Connection'] = 'keep-alive';
 
       if (kDebugMode) {
         LoggerService.logEvent('SSE_CONNECTING', {
