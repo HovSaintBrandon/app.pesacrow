@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart'; // Add this
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'providers/auth_provider.dart';
@@ -21,6 +22,7 @@ import 'widgets/web_frame.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
+  usePathUrlStrategy(); // Add this
   WidgetsFlutterBinding.ensureInitialized();
   final auth = AuthProvider();
 

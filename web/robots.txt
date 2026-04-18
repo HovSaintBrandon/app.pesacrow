@@ -1,0 +1,15 @@
+# PesaCrow — robots.txt
+# https://app.pesacrow.top
+
+User-agent: *
+Allow: /
+
+# Block build artifacts and internal assets that mustn't be indexed
+Disallow: /flutter_bootstrap.js
+Disallow: /main.dart.js
+Disallow: /flutter.js
+Disallow: /*.part.js$
+Disallow: /assets/
+
+# Sitemap location
+Sitemap: https://app.pesacrow.top/sitemap.xml

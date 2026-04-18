@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -16,31 +16,304 @@
   -->
   <base href="$FLUTTER_BASE_HREF">
 
+  <!-- ===================== CORE META ===================== -->
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="PesaCrow - Secure Digital Escrow for Safe Transactions">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 
-  <!-- iOS meta tags & icons -->
+  <!-- Primary SEO Meta Tags -->
+  <title>PesaCrow — Secure Digital Escrow & Safe Online Transactions in Kenya</title>
+  <meta name="title" content="PesaCrow — Secure Digital Escrow & Safe Online Transactions in Kenya">
+  <meta name="description" content="PesaCrow is Kenya's trusted digital escrow platform. Hold funds safely until both buyer and seller confirm delivery. Pay with M-Pesa. Trade with confidence.">
+  <meta name="keywords" content="escrow Kenya, digital escrow, safe online payments, M-Pesa escrow, PesaCrow, secure transactions Kenya, online marketplace safety, buyer seller protection, Nairobi fintech">
+  <meta name="author" content="PesaCrow">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <meta name="language" content="English">
+  <meta name="revisit-after" content="7 days">
+  <meta name="rating" content="general">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://app.pesacrow.top/">
+
+  <!-- ===================== OPEN GRAPH (Facebook / LinkedIn / WhatsApp) ===================== -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://app.pesacrow.top/">
+  <meta property="og:site_name" content="PesaCrow">
+  <meta property="og:title" content="PesaCrow — Secure Digital Escrow & Safe Online Transactions in Kenya">
+  <meta property="og:description" content="Kenya's most trusted digital escrow platform. Hold funds safely with M-Pesa until both buyer and seller confirm the deal. Trade online with full confidence.">
+  <meta property="og:image" content="https://app.pesacrow.top/icons/Icon-512.png">
+  <meta property="og:image:secure_url" content="https://app.pesacrow.top/icons/Icon-512.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="PesaCrow — Secure Digital Escrow Logo">
+  <meta property="og:locale" content="en_KE">
+
+  <!-- ===================== TWITTER / X CARD ===================== -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@pesacrow">
+  <meta name="twitter:creator" content="@pesacrow">
+  <meta name="twitter:url" content="https://app.pesacrow.top/">
+  <meta name="twitter:title" content="PesaCrow — Secure Digital Escrow & Safe Transactions">
+  <meta name="twitter:description" content="Hold funds safely with M-Pesa until both buyer and seller confirm the deal. Kenya's most trusted escrow platform.">
+  <meta name="twitter:image" content="https://app.pesacrow.top/icons/Icon-512.png">
+  <meta name="twitter:image:alt" content="PesaCrow digital escrow platform">
+
+  <!-- ===================== PWA / MOBILE ===================== -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PesaCrow">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="application-name" content="PesaCrow">
+  <meta name="theme-color" content="#2E9D5B">
+  <meta name="msapplication-TileColor" content="#2E9D5B">
+  <meta name="msapplication-TileImage" content="/icons/Icon-192.png">
+  <meta name="msapplication-config" content="none">
+  <meta name="format-detection" content="telephone=no">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>PesaCrow</title>
+  <!-- ===================== ICONS & MANIFEST ===================== -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
   <link rel="manifest" href="manifest.json">
+
+  <!-- ===================== PERFORMANCE: DNS PREFETCH & PRECONNECT ===================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://api.pesacrow.top">
+
+  <!-- ===================== STRUCTURED DATA (JSON-LD) ===================== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://app.pesacrow.top/#webapp",
+        "name": "PesaCrow",
+        "url": "https://app.pesacrow.top/",
+        "description": "Kenya's most trusted digital escrow platform. Securely hold M-Pesa funds until both buyer and seller confirm a transaction.",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web, Android, iOS",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KES"
+        },
+        "creator": {
+          "@type": "Organization",
+          "@id": "https://pesacrow.top/#organization",
+          "name": "PesaCrow",
+          "url": "https://pesacrow.top",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://app.pesacrow.top/icons/Icon-512.png",
+            "width": 512,
+            "height": 512
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "areaServed": "KE",
+            "availableLanguage": ["English", "Swahili"]
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "KE",
+            "addressLocality": "Nairobi"
+          }
+        },
+        "image": "https://app.pesacrow.top/icons/Icon-512.png",
+        "screenshot": "https://app.pesacrow.top/icons/Icon-512.png",
+        "softwareVersion": "1.0.0",
+        "inLanguage": "en-KE"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://app.pesacrow.top/#website",
+        "url": "https://app.pesacrow.top/",
+        "name": "PesaCrow — Secure Digital Escrow",
+        "description": "Kenya's most trusted digital escrow platform for safe M-Pesa transactions.",
+        "publisher": {
+          "@id": "https://pesacrow.top/#organization"
+        },
+        "inLanguage": "en-KE",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://app.pesacrow.top/?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://app.pesacrow.top/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is PesaCrow?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PesaCrow is a secure digital escrow platform in Kenya that holds M-Pesa funds safely until both buyer and seller confirm a deal, protecting both parties from fraud."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does PesaCrow work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A buyer sends M-Pesa payment to PesaCrow's secure escrow account. The funds are held safely while the seller delivers goods or services. Once the buyer confirms receipt, PesaCrow releases the funds to the seller."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is PesaCrow safe?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. PesaCrow uses bank-grade security and M-Pesa's trusted payment infrastructure to protect every transaction. Funds are only released when both parties are satisfied."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I pay on PesaCrow?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PesaCrow supports M-Pesa STK Push payments directly from your phone. Simply enter your M-Pesa number, confirm the push notification, and your funds are held in escrow."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- ===================== LOADING SCREEN STYLES ===================== -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #0A0A0A;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0A0A0A 0%, #111D15 100%);
+      z-index: 9999;
+      transition: opacity 0.4s ease-out;
+    }
+
+    #splash-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .splash-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    .splash-title {
+      color: #2E9D5B;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+    }
+
+    .splash-tagline {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .splash-loader {
+      margin-top: 40px;
+      width: 40px;
+      height: 4px;
+      background: rgba(46, 157, 91, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .splash-loader-bar {
+      height: 100%;
+      width: 40%;
+      background: #2E9D5B;
+      border-radius: 2px;
+      animation: loading 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.06); opacity: 0.85; }
+    }
+
+    @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <!-- Accessible splash screen shown while Flutter loads -->
+  <div id="splash-screen" role="status" aria-label="Loading PesaCrow">
+    <img
+      class="splash-logo"
+      src="icons/Icon-192.png"
+      alt="PesaCrow logo"
+      width="80"
+      height="80"
+    >
+    <p class="splash-title">PesaCrow</p>
+    <p class="splash-tagline">Secure Digital Escrow · Kenya</p>
+    <div class="splash-loader" aria-hidden="true">
+      <div class="splash-loader-bar"></div>
+    </div>
+  </div>
+
+  <!-- No-JS fallback for crawlers -->
+  <noscript>
+    <div style="
+      background:#0A0A0A; color:#fff; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; min-height:100vh;
+      font-family:sans-serif; text-align:center; padding:20px;
+    ">
+      <img src="icons/Icon-192.png" alt="PesaCrow logo" width="80" style="border-radius:16px; margin-bottom:16px">
+      <h1 style="color:#2E9D5B; font-size:24px; margin:0 0 8px">PesaCrow — Secure Digital Escrow</h1>
+      <p style="color:rgba(255,255,255,0.6); max-width:400px; line-height:1.6">
+        Kenya's most trusted digital escrow platform. Hold M-Pesa funds safely until
+        both buyer and seller confirm the deal. Please enable JavaScript to use this app.
+      </p>
+    </div>
+  </noscript>
+
   <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    // Dismiss splash screen once Flutter signals it is ready
+    window.addEventListener('flutter-first-frame', function () {
+      var splash = document.getElementById('splash-screen');
+      if (splash) {
+        splash.classList.add('hidden');
+        setTimeout(function () { splash.remove(); }, 450);
+      }
+    });
+  </script>
 </body>
 </html>
