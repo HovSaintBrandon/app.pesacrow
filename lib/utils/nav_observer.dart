@@ -59,9 +59,13 @@ class AppNavObserver extends NavigatorObserver {
         break;
     }
 
-    SeoService.updateSEO(
-      title: title,
-      description: description,
-    );
+    try {
+      SeoService.updateSEO(
+        title: title,
+        description: description,
+      );
+    } catch (e) {
+      if (kDebugMode) print('Navigation SEO update failed: \$e');
+    }
   }
 }
