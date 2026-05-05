@@ -19,9 +19,14 @@ class _PayoutPreferencesScreenState extends State<PayoutPreferencesScreen> {
   final _shortcodeCtrl = TextEditingController();
   final _accountRefCtrl = TextEditingController();
   final _tillCtrl = TextEditingController();
+  final _bankAccountCtrl = TextEditingController();
+  final _airtelPhoneCtrl = TextEditingController();
   
-  String _payoutType = 'normal'; // 'normal', 'paybill', 'buy_goods', 'pochi'
+  String _payoutType = 'normal'; // 'normal', 'paybill', 'buy_goods', 'pochi', 'bank', 'airtel'
   String _signupPhone = '';
+  List<dynamic> _banks = [];
+  String? _selectedBankCode;
+  String? _selectedBankName;
   bool _loading = false;
   bool _fetching = true;
 
@@ -29,7 +34,21 @@ class _PayoutPreferencesScreenState extends State<PayoutPreferencesScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPreferences();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    await _fetchBanks();
+    await _loadPreferences();
+  }
+
+  Future<void> _fetchBanks() async {
+    try {
+      final banks = await ApiService.getBanks();
+      setState(() => _banks = banks);
+    } catch (e) {
+      LoggerService.logError('Fetch banks failed', e);
+    }
   }
 
   Future<void> _loadPreferences() async {
@@ -47,6 +66,10 @@ class _PayoutPreferencesScreenState extends State<PayoutPreferencesScreen> {
 
           _accountRefCtrl.text = pref['paybillAccountReference'] ?? '';
           _tillCtrl.text = pref['buyGoodsTill'] ?? '';
+          _bankAccountCtrl.text = pref['bankAccountNumber'] ?? '';
+          _airtelPhoneCtrl.text = pref['airtelPhone'] ?? '';
+          _selectedBankCode = pref['bankCode'];
+          _selectedBankName = pref['bankName'];
           _fetching = false;
         });
       }
@@ -74,6 +97,12 @@ class _PayoutPreferencesScreenState extends State<PayoutPreferencesScreen> {
         data['paybillAccountReference'] = _accountRefCtrl.text.trim();
       } else if (_payoutType == 'buy_goods') {
         data['buyGoodsTill'] = _tillCtrl.text.trim();
+      } else if (_payoutType == 'bank') {
+        data['bankCode'] = _selectedBankCode;
+        data['bankName'] = _selectedBankName;
+        data['bankAccountNumber'] = _bankAccountCtrl.text.trim();
+      } else if (_payoutType == 'airtel') {
+        data['airtelPhone'] = _airtelPhoneCtrl.text.trim();
       } else {
         data['payoutPhone'] = _phoneCtrl.text.trim();
       }
@@ -163,16 +192,22 @@ class _PayoutPreferencesScreenState extends State<PayoutPreferencesScreen> {
                     crossAxisSpacing: 16,
                     childAspectRatio: 2.2,
                     children: [
-                      _buildPayoutCard('Standard M-Pesa', 'normal', Icons.phone_iphone_rounded, 'Direct to your phone number'),
+                      _buildPayoutCard('Standard M-Pesa', 'normal', Icons.phone_iphone_rounded, 'Direct to phone'),
+                      _buildPayoutCard('Bank Transfer', 'bank', Icons.account_balance_rounded, 'Local bank account'),
+                      _buildPayoutCard('Airtel Money', 'airtel', Icons.cell_tower_rounded, 'Airtel wallet'),
                       _buildPayoutCard('M-Pesa Paybill', 'paybill', Icons.account_balance_wallet_rounded, 'Business shortcodes'),
-                      _buildPayoutCard('M-Pesa Buy Goods', 'buy_goods', Icons.shopping_cart_rounded, 'Till numbers (Lipa na M-Pesa)'),
-                      _buildPayoutCard('Pochi la Biashara', 'pochi', Icons.storefront_rounded, 'Personal merchant wallets'),
+                      _buildPayoutCard('M-Pesa Buy Goods', 'buy_goods', Icons.shopping_cart_rounded, 'Till numbers'),
+                      _buildPayoutCard('Pochi la Biashara', 'pochi', Icons.storefront_rounded, 'Personal merchant'),
                     ],
                   )
                 else
                   Column(
                     children: [
-                      _buildPayoutCard('Standard M-Pesa', 'normal', Icons.phone_iphone_rounded, 'Direct to your mobile number'),
+                      _buildPayoutCard('Standard M-Pesa', 'normal', Icons.phone_iphone_rounded, 'Direct to phone'),
+                      const SizedBox(height: 12),
+                      _buildPayoutCard('Bank Transfer', 'bank', Icons.account_balance_rounded, 'Local bank account'),
+                      const SizedBox(height: 12),
+                      _buildPayoutCard('Airtel Money', 'airtel', Icons.cell_tower_rounded, 'Airtel wallet'),
                       const SizedBox(height: 12),
                       _buildPayoutCard('M-Pesa Paybill', 'paybill', Icons.account_balance_wallet_rounded, 'Business shortcodes'),
                       const SizedBox(height: 12),
@@ -254,13 +289,27 @@ class _PayoutPreferencesScreenState extends State<PayoutPreferencesScreen> {
           ),
         ],
       );
-    } else if (_payoutType == 'buy_goods') {
+    } else if (_payoutType == 'bank') {
+      return Column(
+        key: const ValueKey('bank-fields'),
+        children: [
+          _buildBankDropdown(theme),
+          const SizedBox(height: 24),
+          _buildTextField(
+            controller: _bankAccountCtrl,
+            label: 'Account Number',
+            hint: 'Enter your bank account number',
+            icon: Icons.numbers_rounded,
+          ),
+        ],
+      );
+    } else if (_payoutType == 'airtel') {
       return _buildTextField(
-        key: const ValueKey('buygoods-fields'),
-        controller: _tillCtrl,
-        label: 'Buy Goods Till Number',
-        hint: 'e.g. 192837',
-        icon: Icons.store_rounded,
+        key: const ValueKey('airtel-fields'),
+        controller: _airtelPhoneCtrl,
+        label: 'Airtel Money Number',
+        hint: '2547XXXXXXXX',
+        icon: Icons.phone_android_rounded,
       );
     } else {
       return Column(
@@ -299,6 +348,42 @@ class _PayoutPreferencesScreenState extends State<PayoutPreferencesScreen> {
         ],
       );
     }
+  }
+
+  Widget _buildBankDropdown(ThemeData theme) {
+    // Ensure the selected code actually exists in the bank list to prevent crashes
+    final isValidValue = _banks.any((bank) => bank['paybill']?.toString() == _selectedBankCode);
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: isValidValue ? _selectedBankCode : null,
+          hint: Text('Select Bank', style: GoogleFonts.inter(color: Colors.grey.shade500)),
+          isExpanded: true,
+          dropdownColor: theme.cardColor,
+          items: _banks.map((bank) {
+            final code = bank['paybill']?.toString();
+            return DropdownMenuItem<String>(
+              value: code,
+              child: Text(bank['name'] ?? 'Unknown Bank', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+            );
+          }).toList(),
+          onChanged: (val) {
+            final bank = _banks.firstWhere((b) => b['paybill']?.toString() == val);
+            setState(() {
+              _selectedBankCode = val;
+              _selectedBankName = bank['name'];
+            });
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildTextField({

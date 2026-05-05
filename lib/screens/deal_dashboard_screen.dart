@@ -781,7 +781,7 @@ class _DealDashboardScreenState extends State<DealDashboardScreen> {
           if (res == true) _fetchDeal();
         },
         icon: const Icon(Icons.flash_on_rounded, size: 20),
-        label: const Text('SECURE WITH M-PESA'),
+        label: const Text('SECURE FUNDS'),
       ).animate(onPlay: (c) => c.repeat(reverse: true)).shimmer(duration: 2.seconds, color: Colors.white.withOpacity(0.2));
     }
 
@@ -857,7 +857,15 @@ class _DealDashboardScreenState extends State<DealDashboardScreen> {
       );
     }
 
-    if (primary == null && secondary == null) return const SizedBox.shrink();
+    final backToDash = Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: TextButton.icon(
+        onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+        icon: const Icon(Icons.dashboard_rounded, size: 16),
+        label: Text('BACK TO DASHBOARD', style: GoogleFonts.inter(fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1)),
+        style: TextButton.styleFrom(foregroundColor: Colors.grey.shade600),
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
@@ -873,6 +881,7 @@ class _DealDashboardScreenState extends State<DealDashboardScreen> {
             children: [
               if (secondary != null) ...[secondary, const SizedBox(height: 12)],
               if (primary != null) primary,
+              backToDash,
             ],
           ),
         ),

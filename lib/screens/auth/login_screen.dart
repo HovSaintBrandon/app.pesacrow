@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import '../../services/logger_service.dart';
 import 'otp_verification_screen.dart';
+import '../terms_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final String? transactionId;
@@ -21,6 +23,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneCtrl = TextEditingController();
   bool _loading = false;
+  bool _agreedToTerms = false;
   String? _error;
   late String _selectedRole;
 
@@ -39,6 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool get _isBuyer => _selectedRole == 'buyer';
 
   Future<void> _sendOtp() async {
+    if (!_agreedToTerms) {
+      setState(() => _error = 'You must agree to the Terms and Conditions');
+      return;
+    }
     final raw = _phoneCtrl.text.replaceAll(RegExp(r'\D'), '');
     // Accept 9 digits (7XXXXXXXX), 10 digits (07XXXXXXXX), or 12 digits (254XXXXXXXX)
     if (raw.length < 9) {
@@ -163,6 +170,51 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ).animate().fadeIn(delay: 300.ms),
 
+                  const SizedBox(height: 24),
+
+                  // T&C Checkbox
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: Checkbox(
+                          value: _agreedToTerms,
+                          activeColor: roleColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                          onChanged: (val) => setState(() => _agreedToTerms = val ?? false),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade600, height: 1.4),
+                            children: [
+                              const TextSpan(text: 'I agree to the '),
+                              TextSpan(
+                                text: 'Terms and Conditions',
+                                style: TextStyle(color: roleColor, fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
+                                recognizer: TapGestureRecognizer()..onTap = () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TermsScreen()));
+                                },
+                              ),
+                              const TextSpan(text: ' and have read the '),
+                              TextSpan(
+                                text: 'Privacy Policy',
+                                style: TextStyle(color: roleColor, fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
+                                recognizer: TapGestureRecognizer()..onTap = () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TermsScreen()));
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ).animate().fadeIn(delay: 350.ms),
+
                   if (_error != null) ...[
                     const SizedBox(height: 16),
                     Container(
@@ -185,9 +237,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 48),
 
                   ElevatedButton(
-                    onPressed: _loading ? null : _sendOtp,
+                    onPressed: (_loading || !_agreedToTerms) ? null : _sendOtp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: roleColor,
+                      disabledBackgroundColor: roleColor.withOpacity(0.3),
                       minimumSize: const Size(double.infinity, 70),
                     ),
                     child: _loading

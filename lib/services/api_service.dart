@@ -193,4 +193,9 @@ class ApiService {
         'transactionId': transactionId,
         'buyerPhone': buyerPhone,
       });
+
+  static Future<List<dynamic>> getBanks() async {
+    final data = await _get('/payments/banks');
+    return data['data'] ?? data;
+  }
 }

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 import '../services/logger_service.dart';
 import '../services/sse_service.dart';
@@ -27,6 +28,7 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   final _phoneCtrl = TextEditingController();
+  String _selectedMethod = 'mpesa';
   bool _stkLoading = false;
   String? _statusMessage;
   bool _paymentInitiated = false;
@@ -80,6 +82,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _onPayTap() async {
+    if (_selectedMethod != 'mpesa') {
+      final url = Uri.parse('https://api.escrow.pesacrow.top/pay/${widget.transactionId}');
+      try {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } catch (e) {
+        if (mounted) AppNotifications.showError(context, 'Could not open checkout page');
+      }
+      return;
+    }
+
     final phoneRaw = _phoneCtrl.text.trim();
     final phone = PhoneUtils.normalize(phoneRaw);
     if (phone.isEmpty) { AppNotifications.showError(context, 'Enter a valid M-Pesa number'); return; }
@@ -270,9 +282,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
         const SizedBox(height: 48),
 
+        // Payment Method Selector
+        _buildPaymentMethodSelector(theme),
+
+        const SizedBox(height: 32),
+
         // Cyber-Input for M-Pesa
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        if (_selectedMethod == 'mpesa') ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           decoration: BoxDecoration(
             color: theme.cardColor,
             borderRadius: BorderRadius.circular(24),
@@ -299,6 +317,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ).animate().fadeIn(delay: 300.ms),
 
         const SizedBox(height: 48),
+        ],
 
         // High-Impact Pay Button
         if (!_paymentInitiated)
@@ -316,7 +335,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               children: [
                 const Icon(Icons.lock_rounded, size: 20, color: Colors.white),
                 const SizedBox(width: 12),
-                Text('SECURE PAYMENT WITH M-PESA', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5)),
+                Text(_selectedMethod == 'mpesa' ? 'SECURE PAYMENT WITH M-PESA' : 'PROCEED TO SECURE CHECKOUT', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5)),
               ],
             ),
           ).animate().shimmer(duration: 2.seconds, color: Colors.white24).fadeIn(delay: 400.ms),
@@ -412,6 +431,47 @@ class _PaymentScreenState extends State<PaymentScreen> {
           Text(label, style: TextStyle(color: sub ? Colors.grey.shade600 : Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
           Text(value, style: GoogleFonts.inter(fontWeight: isHeader ? FontWeight.w900 : FontWeight.w700, fontSize: isHeader ? 16 : 14, color: isHeader ? null : (sub ? Colors.grey.shade600 : null))),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodSelector(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('SELECT PAYMENT METHOD', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _methodCard('M-Pesa', 'mpesa', Icons.phone_android_rounded)),
+            const SizedBox(width: 12),
+            Expanded(child: _methodCard('Bank', 'bank', Icons.account_balance_rounded)),
+            const SizedBox(width: 12),
+            Expanded(child: _methodCard('Airtel', 'airtel', Icons.cell_tower_rounded)),
+          ],
+        ),
+      ],
+    ).animate().fadeIn(delay: 250.ms);
+  }
+
+  Widget _methodCard(String label, String value, IconData icon) {
+    final isSelected = _selectedMethod == value;
+    return GestureDetector(
+      onTap: _paymentInitiated ? null : () => setState(() => _selectedMethod = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? _green.withOpacity(0.1) : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isSelected ? _green : Colors.white.withOpacity(0.05)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: isSelected ? _green : Colors.grey.shade500, size: 28),
+            const SizedBox(height: 8),
+            Text(label, style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13, color: isSelected ? _green : Colors.grey.shade400)),
+          ],
+        ),
       ),
     );
   }
